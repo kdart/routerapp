@@ -126,12 +126,12 @@ class InterfaceList(dict):
         else:
             raise ControllerError("unrecognized status value: {!r}".format(val))
 
-
     def __str__(self):
         return "\n".join([str(o) for o in self.values()])
 
 
 class RouterManager(object):
+
     def get_interfaces(self):
         proc = proctools.spawnpipe("/usr/bin/vtysh -c 'show int'")
         out = proc.read()

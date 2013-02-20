@@ -15,7 +15,7 @@
 #    Lesser General Public License for more details.
 
 """
-User management. Create and update users. Expects the nss-sqlite module to be installed.
+User management. Create and update users. Expects the nss-sqlite NSS module to be installed.
 
 """
 from __future__ import absolute_import
