@@ -1,0 +1,31 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+
+
+# User to run handler as. This apps auth module drops privileges instead of the
+# web framework, so keep it root.
+USERNAME = "root"
+
+include("database.conf")
+include("icons.conf")
+
+MIDDLEWARE_CLASSES = ()
+
+# Map pattern to handler functions.
+# Remember these are relative to the server name as base name, unless
+# BASEPATH is also set here.
+LOCATIONMAP = (
+  (r"^/?$", "router.ui.main.index"),
+  (r"^/config/?$", "router.ui.config.index"),
+  (r"^/config/system/?$", "router.ui.config.system"),
+  (r"^/diagnostics/?$", "router.ui.diagnostics.index"),
+  (r"^/impairments/?$", "router.ui.impairments.index"),
+  (r"^/dashboard/?$", "router.ui.status.dashboard"),
+  (r"^/login$", "router.ui.auth.login"),
+  (r"^/logout$", "router.ui.auth.logout"),
+    # aliases don't have a dot in the name.
+  (r'/media/css/(?P<name>\S+)', "css"),
+  (r'/media/js/(?P<name>\S+)', "js"),
+  (r'/media/images/(?P<name>\S+)', "images"),
+)
+
