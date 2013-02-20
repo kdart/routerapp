@@ -1,0 +1,20 @@
+#!/usr/bin/python
+# -*- coding: us-ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+"""
+Add a new user to this system.
+
+newuser --first_name=First --last_name=Last --password=newpass flast
+
+"""
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
+import sys
+from router.db import users
+
+users.newuser(sys.argv)
+
