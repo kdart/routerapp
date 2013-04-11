@@ -26,7 +26,6 @@ from __future__ import division
 from pycopia import aid
 from pycopia import ipv4
 from pycopia import proctools
-from pycopia.dictlib import AttrDict
 
 from router.db import models
 

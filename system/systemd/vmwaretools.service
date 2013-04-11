@@ -1,0 +1,13 @@
+[Unit]
+Description=VMWare Tools
+
+[Service]
+Type=forking
+PIDFile=/var/run/vmtoolsd.pid
+User=root
+Group=vmware
+ExecStart=/usr/bin/vmtoolsd -b /var/run/vmtoolsd.pid
+
+[Install]
+WantedBy=multi-user.target
+

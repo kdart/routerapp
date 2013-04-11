@@ -12,6 +12,9 @@ Tables for router management.
 typical database:
   create DATABASE router ENCODING 'utf-8' OWNER admin;
 
+The schema is compatible with libnss-sqlite package requirements. Except this
+does not provide the shadow db. It does add a few extra fields.
+
 """
 from datetime import datetime
 
@@ -87,7 +90,7 @@ passwd =  Table('passwd', metadata,
         Column('gecos', TEXT(convert_unicode=True), nullable=False, default=""), # NSS
         Column('shell', TEXT(convert_unicode=True), nullable=False, default="/bin/sh"), # NSS
         Column('homedir', TEXT(convert_unicode=True), nullable=False), # NSS
-        Column('password', VARCHAR(length=256, convert_unicode=False), ), # encrypted
+        Column('password', VARCHAR(length=256, convert_unicode=False), ), # encrypted plaintext pw for web auth
         Column('first_name', VARCHAR(length=30, convert_unicode=False), nullable=False),
         Column('middle_name', VARCHAR(length=30, convert_unicode=False), ),
         Column('last_name', VARCHAR(length=30, convert_unicode=False), nullable=False),

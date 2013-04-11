@@ -1,0 +1,16 @@
+[Unit]
+Description=GNU Zebra Routing Manager
+After=syslog.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/quagga/zebra.pid
+ExecStartPre=/bin/mkdir /var/run/quagga
+ExecStartPre=/bin/chown quagga:quagga /var/run/quagga
+ExecStartPre=/bin/chmod 0750 /var/run/quagga
+ExecStartPre=/bin/ip route flush proto zebra
+ExecStart=/usr/sbin/zebra -d -i /var/run/quagga/zebra.pid -f /etc/quagga/zebra.conf -A 127.0.0.1
+
+[Install]
+WantedBy=multi-user.target
+

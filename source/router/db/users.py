@@ -21,11 +21,12 @@ User management. Create and update users. Expects the nss-sqlite NSS module to b
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
-from __future__ import division
 
 import sys
 import crypt
 import sqlite3
+import os
+import shutil
 
 from pycopia import getopt
 from pycopia import tty
@@ -83,9 +84,13 @@ def ask_password():
 
 def newuser(argv):
     """Create a new user
-    newuser [<longopts>] <username>
+    newuser [-Mm] [<longopts>] <username>
 
-    Where options are:
+    Options:
+        -M  Do NOT make home directory.
+        -m  Only make home directory for existing user with no home directory.
+
+    Where long options are:
         --first_name=<firstname>
         --last_name=<lastname>
         --password=<newpass>
@@ -93,9 +98,12 @@ def newuser(argv):
         --home=<home>
     You will be prompted for missing information.
 
+    This function should be run as root user.
     """
+    makehome = True
+    onlyhome = False
     try:
-        opts, longopts, args = getopt.getopt(argv[1:], "h?")
+        opts, longopts, args = getopt.getopt(argv[1:], "h?Mm")
     except getopt.GetoptError:
         print (newuser.__doc__)
         return
@@ -103,6 +111,10 @@ def newuser(argv):
         if opt in ("-?", "-h"):
             print (newuser.__doc__)
             return
+        elif opt == "-M":
+            makehome = False
+        elif opt == "-m":
+            onlyhome = True
 
     try:
         username = args[0]
@@ -114,8 +126,12 @@ def newuser(argv):
     except KeyError:
         pass
     else:
-        print("User already exists, exiting.", file=sys.stderr)
-        return
+        if onlyhome:
+            make_homedir(pwent.home, pwent.uid, pwent.gid)
+            return
+        else:
+            print("User already exists, exiting.", file=sys.stderr)
+            return
 
     password = longopts.get("password")
     if not password:
@@ -176,7 +192,38 @@ def newuser(argv):
     user.groups = sup_groups
     models.dbsession.commit()
     new_shadow(username, password)
+    if makehome:
+        make_homedir(home, user.uid, user.gid)
     return user
+
+def make_homedir(homedir, uid, gid):
+    if not os.path.isdir(homedir):
+        _copytree("/etc/skel", homedir, uid, gid)
+
+def _copytree(src, dst, uid, gid):
+    errors = []
+    os.mkdir(dst)
+    names = os.listdir(src)
+    for name in names:
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        try:
+            if os.path.isdir(srcname):
+                _copytree(srcname, dstname, uid, gid)
+            else:
+                shutil.copy(srcname, dstname)
+                os.chown(dstname, uid, gid)
+        except shutil.Error as err:
+            errors.extend(err.args[0])
+        except EnvironmentError as why:
+            errors.append((srcname, dstname, str(why)))
+    try:
+        shutil.copymode(src, dst)
+        os.chown(dst, uid, gid)
+    except OSError, why:
+        errors.extend((src, dst, str(why)))
+    if errors:
+        raise shutil.Error(errors)
 
 
 def newpass(argv):
@@ -231,4 +278,5 @@ def deleteuser(argv):
     models.delete(user)
     models.close()
     delete_shadow(username)
+    shutil.rmtree(user.home, ignore_errors=True)
 
